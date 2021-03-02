@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="00f6b9a3-ad75-4ccf-a348-aabe9df66514" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<db:config name="Database_Config1" doc:name="Database Config" doc:id="ee4fff5d-5c91-4fd1-b38b-b157f1d2b36a" >
+		<db:oracle-connection host="localhost" user="SYSTEM" password="veeru"/>
+	</db:config>
+	<flow name="db-schedulerFlow" doc:id="4e6fdd60-3c4d-47b3-9b78-66fca077ae76" >
+		<http:listener doc:name="Listener" doc:id="55541bc4-f65d-4254-a417-69b0f5aba8ad" config-ref="HTTP_Listener_config" path="/db"/>
+		<db:select doc:name="Select" doc:id="be980bcc-4ad4-49e8-9642-b73e22bf5708" config-ref="Database_Config1">
+			<db:sql ><![CDATA[select *from kish]]></db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="a04b5aaa-eb37-4fc9-a42a-6c77773b4867" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>
