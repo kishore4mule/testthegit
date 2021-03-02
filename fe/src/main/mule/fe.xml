@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="66a4ae73-4dd2-49b6-b954-e6dbdf91eabd" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<file:config name="File_Config" doc:name="File Config" doc:id="1b05eca6-ceda-4df2-9352-9ae58dd8ee8a" >
+		<file:connection workingDir="C:\Users\91955\OneDrive\Desktop\kishore\output" />
+	</file:config>
+	<flow name="feFlow" doc:id="33779180-1f1c-4942-9cf0-d736b15cb92e" >
+		<http:listener doc:name="Listener" doc:id="c9f0dd74-a963-4f90-bd01-633efe36e0c7" config-ref="HTTP_Listener_config" path="/fe"/>
+		<set-payload value='#[[10,20,"kishore","balaji",30,40,50]]' doc:name='[10,20,"kishore","balaji",30,40,50]' doc:id="d161a6a4-6393-4ecc-ba75-31a0f46e5812" />
+		<flow-ref doc:name="Flow Reference" doc:id="75e44848-d2c4-4977-808b-bae722ff85dc" name="feSub_Flow"/>
+		<ee:transform doc:name="Transform Message" doc:id="086c5353-871d-4a35-9b54-f3a3bb1d2777" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json 
+---
+payload.payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<sub-flow name="feSub_Flow" doc:id="394bba8b-0035-421e-a7a8-a421da84c999" >
+		<parallel-foreach doc:name="Parallel For Each" doc:id="c68ceef3-55d5-4d7a-ab71-e6114f543661">
+			<try doc:name="Try" doc:id="d4cd1325-3cbe-4afd-82ed-5d866d0458f3">
+				<set-payload value="#[payload *10]" doc:name="Set Payload" doc:id="e65f1940-277b-4493-9d5e-8d60df6e2c85" />
+				<logger level="INFO" doc:name="Logger" doc:id="9de5a224-8145-4694-a750-fb5e7cda4a9a" message="#[payload]" />
+				<error-handler>
+					<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="fa0ccb45-c754-4231-9ebd-835d9c42b9f3" type="ANY">
+					</on-error-continue>
+				</error-handler>
+			</try>
+		</parallel-foreach>
+	</sub-flow>
+</mule>
