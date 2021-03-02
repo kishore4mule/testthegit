@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:validation="http://www.mulesoft.org/schema/mule/validation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="17d88d52-a6ce-4fe7-91e0-230e1d7b852b" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="dcffe77b-d32e-41c0-9864-9e667b1aff77" >
+		<db:oracle-connection host="localhost" user="SYSTEM" password="veeru" />
+	</db:config>
+	<validation:config name="Validation_Config" doc:name="Validation Config" doc:id="141c823e-7b43-4315-944c-95baa7226901" />
+	<flow name="db111Flow" doc:id="ac820576-0b13-480a-89c2-dc3755def9d8" >
+		<http:listener doc:name="Listener" doc:id="a319c5a3-c95e-497f-963e-6029d7370656" config-ref="HTTP_Listener_config" path="/db">
+			<http:error-response statusCode="#[vars.v1]" reasonPhrase="#[vars.v2]" >
+				<http:body ><![CDATA[#[payload]]]></http:body>
+			</http:error-response>
+		</http:listener>
+		<logger level="INFO" doc:name="Logger" doc:id="aa9b4868-66e2-46dd-84b2-dad10975ffbf" message="flow started here"/>
+		<validation:is-not-null doc:name="Is not null" doc:id="de9ee072-f332-4765-a9e6-672d450e86ef" config-ref="Validation_Config" value="#[attributes.queryParams.name]"/>
+		<db:select doc:name="Select" doc:id="ac82899a-a48d-4a5d-bf00-5075aa74fbe9" config-ref="Database_Config">
+			<db:sql ><![CDATA[select *from employee where firstname=:result]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	result:attributes.queryParams.name
+}]]]></db:input-parameters>
+		</db:select>
+		<choice doc:name="Choice" doc:id="6bb734b6-5f20-4f28-9ca2-81398fcd5d31" >
+			<when expression="#[sizeOf(payload)&gt;0]">
+				<ee:transform doc:name="Transform Message" doc:id="3237b072-61cc-4c4d-b0aa-2c3ee0b78c21">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+			</when>
+			<otherwise >
+				<raise-error doc:name="Raise error" doc:id="e7b23f46-ebb6-4d8c-8658-88282af2d24c" type="EMP:EMP_NOTFOUND"/>
+				<logger level="INFO" doc:name="Logger" doc:id="bd4e2fcf-7eed-40cd-869b-8d72f41151e5" message="default route"/>
+			</otherwise>
+		</choice>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="210e7394-855f-49e3-b83f-49a46a16ed49" type="EMP:EMP_NOTFOUND">
+				<ee:transform doc:name="Transform Message" doc:id="d17ab7c8-776f-4e51-b362-02f4cfb8567a" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message":"resource is not found on the system"
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="v1" ><![CDATA[404]]></ee:set-variable>
+						<ee:set-variable variableName="v2" ><![CDATA["NOT FOUND"]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</on-error-propagate>
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="6e50a548-48c6-42ca-a74e-7ee0926f33aa" type="VALIDATION:NULL">
+				<ee:transform doc:name="Transform Message" doc:id="ae655770-e7ef-48fa-9f91-c3ce54c97434" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message":"input parameter cannot be empty,provide correct input"
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="v1" ><![CDATA[400]]></ee:set-variable>
+						<ee:set-variable variableName="v2" ><![CDATA["BADREQUEST"]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+</mule>
