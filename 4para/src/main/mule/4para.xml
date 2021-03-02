@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="f839e6cd-728f-4008-8429-4f03c0004130" >
+		<http:listener-connection host="0.0.0.0" port="8082" />
+	</http:listener-config>
+	<flow name="4paraFlow" doc:id="17098e73-edc4-4ce3-9252-a04d2f2f270e" >
+		<http:listener doc:name="Listener" doc:id="81c8e5fb-dbb4-480f-a608-357d8c5bb9dc" config-ref="HTTP_Listener_config" path="/paraweb"/>
+		<http:request method="GET" doc:name="Request" doc:id="602fa5d9-2877-402e-b042-77d4e1d067b9" url="https://api.first.org/data/v1/teams">
+			<http:query-params ><![CDATA[#[output application/java
+---
+{
+	region : attributes.queryParams.region
+}]]]></http:query-params>
+		</http:request>
+	</flow>
+</mule>
