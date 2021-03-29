@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="87c1d32b-c721-4f29-91f9-c5b386c231e6" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<flow name="for-each1Flow" doc:id="5bcc3d61-5c98-4720-9ad6-203a24951c64" >
+		<http:listener doc:name="Listener" doc:id="2c587226-e7f6-4a7b-ac4f-1b578e77f80f" config-ref="HTTP_Listener_config" path="/fe"/>
+		<set-payload value='#[[1,"a",10,"kishore",20,50]]' doc:name='[1,"a",10,"kishore",20,50]' doc:id="89d85322-550c-4309-87b3-275462aafb02" />
+		<foreach doc:name="For Each" doc:id="4ac37ee4-0e70-437a-82fc-39bd5a6b3ede" >
+			<try doc:name="Try" doc:id="3d175f84-4383-43a2-ac6a-12a030361f6e" >
+				<set-payload value="#[payload *10]" doc:name="payload *10" doc:id="6f9e67e4-fb01-44ec-aa97-093d3600632e" />
+				<error-handler >
+					<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="90a254e8-86eb-4689-9495-c71779496369" type="ANY">
+						<logger level="INFO" doc:name="Logger" doc:id="7bbccd21-351e-4734-a7e6-6d714b23425f" message="#[error.errorType]"/>
+					</on-error-continue>
+				</error-handler>
+			</try>
+			<logger level="INFO" doc:name="Logger" doc:id="d7166367-e89f-4a2b-b3e8-f8d70c914e80" message="#[payload]"/>
+		</foreach>
+		<ee:transform doc:name="Transform Message" doc:id="aeb1a717-9ca3-4dc9-8d7a-a98a9c3fd967" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>
