@@ -1,0 +1,12 @@
+#%RAML 1.0 SecurityScheme
+type: Basic Authentication
+describedBy:
+  headers:
+    username:
+      maxLength: 10
+      minLength: 3
+    password:
+      maxLength: 8
+      minLength: 4
+  
+  

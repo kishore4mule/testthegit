@@ -1,0 +1,46 @@
+#%RAML 1.0
+title: march 5
+protocols: [HTTP,HTTPS]
+types:
+  firsttype: !include reqschema/firstnamedataType.raml
+  lasttype:  !include reqschema/lastnamedataType.raml
+  getid: !include reqschema/getdataType.raml
+traits:
+  postres: !include traits/trait.raml
+  getres: !include traits/getresptrait.raml
+securitySchemes:
+  basiccustom: !include securityScheme.raml
+securedBy:
+  - basiccustom
+    
+
+/consumer:
+  post:
+    queryParameters:
+      firstname: firsttype
+      lastname: lasttype
+    is:
+      - postres
+    
+
+/customer:
+  get:
+    queryParameters:
+      id: getid
+    is:
+      - getres
+    
+    
+    
+               
+              
+  
+
+    
+
+       
+  
+
+    
+
+
