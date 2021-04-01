@@ -1,0 +1,28 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
+  <types:catalog>
+    <types:type name="ip" format="csv">
+      <types:shape format="weave" example="examples/exam.csv"><![CDATA[%dw 2.0
+
+type ip = Array<{|  "First Name": String,   "Last Name": String,   Gender: String,   Country: String,   Age: String,   Id: String|}> {"isQuotedString": "false",
+"header": "true",
+"headerLineNumber": "0"}
+
+]]></types:shape>
+      <types:properties>
+        <types:property name="headerLineNumber" value="0"/>
+        <types:property name="header" value="true"/>
+        <types:property name="isQuotedString" value="false"/>
+      </types:properties>
+    </types:type>
+  </types:catalog>
+  <types:enrichment select="#ae5aba9f-a0ce-4acc-a2c4-4f7b09b4c88a">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="ip"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
+</types:mule>
