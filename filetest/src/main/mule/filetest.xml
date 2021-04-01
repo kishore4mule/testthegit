@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:s3="http://www.mulesoft.org/schema/mule/s3" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/s3 http://www.mulesoft.org/schema/mule/s3/current/mule-s3.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="a153dea3-577e-4dd0-a412-d3d5e42a3585" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<file:config name="File_Config" doc:name="File Config" doc:id="9c50b15c-770e-4a44-976c-377f85bf5d50" >
+		<file:connection workingDir="C:\Users\91955\Desktop\kishore\output" />
+	</file:config>
+	<s3:config name="Amazon_S3_Configuration" doc:name="Amazon S3 Configuration" doc:id="038fdca0-1ba9-4184-9675-ae2f4617d4da" >
+		<s3:basic-connection accessKey="AKIAZVH4F6F5YEQRDGNV" secretKey="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" />
+	</s3:config>
+	<flow name="filetestFlow" doc:id="82e3cf1d-34cb-4d83-a00c-9359e4f8016f" >
+		<http:listener doc:name="Listener" doc:id="5d3874a2-989d-4194-858d-17feb7b9293a" config-ref="HTTP_Listener_config" path="/test"/>
+		<s3:get-object doc:name="Get object" doc:id="2b5ea08a-a333-4e47-b8e9-cf32d1716c57" config-ref="Amazon_S3_Configuration" bucketName="kishore4mule" key="kishore" />
+		<ee:transform doc:name="Transform Message" doc:id="7999f698-c8c6-4b04-88bc-9de6c8337fd1">
+				<ee:message>
+					<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+	</flow>
+</mule>
