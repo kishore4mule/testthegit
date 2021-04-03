@@ -15,6 +15,18 @@ http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/cu
 	</db:config>
 	<flow name="config-propertiesFlow" doc:id="f8bf0656-29af-4e10-b4de-4a47c95a5b12" >
 		<http:listener doc:name="Listener" doc:id="12fe2d0d-86d8-47e2-8cb5-183b503efa9f" config-ref="HTTP_Listener_config" path="${http.path}"/>
-		<logger level="INFO" doc:name="Logger" doc:id="07f02df6-392b-4a09-9e0a-71f5488ed9e1" message='#[payload]'/>
+		<db:select doc:name="Select" doc:id="c280013b-1271-490b-86a8-fc1b94e6cd53" config-ref="Database_Config">
+			<db:sql ><![CDATA[select *from mar26]]></db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="8ce9cb69-b240-4fb8-a7c0-a303cd84d500" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"httpport":Mule::p("http.port")
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
 	</flow>
 </mule>
