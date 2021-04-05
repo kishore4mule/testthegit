@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:os="http://www.mulesoft.org/schema/mule/os"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="241a80bf-2328-4695-b76a-92c4aa2ca16d" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<os:config name="ObjectStore_Config" doc:name="ObjectStore Config" doc:id="697990bb-dafe-4afa-8ca4-c5beecfd1b7e" >
+		<os:connection >
+			<reconnection failsDeployment="true" />
+		</os:connection>
+	</os:config>
+	<os:object-store name="Object_store" doc:name="Object store" doc:id="f8c1c921-bf94-4a0f-a2a3-233f794d629e" config-ref="ObjectStore_Config" />
+	<flow name="os-demoFlow" doc:id="a40d896b-2028-4f9c-97ba-e0b274cde221" >
+		<http:listener doc:name="POST" doc:id="3800ca18-fd18-48ba-8517-4a55d40424f9" config-ref="HTTP_Listener_config" path="/store" allowedMethods="POST"/>
+		<os:store doc:name="Store" doc:id="a6065505-e476-4610-9eb2-4f154d11aaf2" key="#[attributes.queryParams.keyname]" objectStore="Object_store" failIfPresent="true"/>
+	</flow>
+	<flow name="os-demoFlow1" doc:id="e06a97a0-309f-4d4a-a8cf-419b8ea5ef15" >
+		<http:listener doc:name="Listener" doc:id="fabcb813-0009-420d-9b0d-ae3e3133f969" config-ref="HTTP_Listener_config" path="/ret"/>
+		<set-variable value="#[attributes.queryParams.keyname]" doc:name="Set Variable" doc:id="847a157b-6c3c-4c5e-aa26-5a6cf48345c7" variableName="v1"/>
+		<os:contains doc:name="Contains" doc:id="504b705d-9413-4f9b-a58b-c514bd83afdd" key="#[vars.v1]" objectStore="Object_store"/>
+		<ee:transform doc:name="Transform Message" doc:id="3e64afdf-81ee-4ab6-ae72-4acd69898830" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<flow-ref doc:name="Flow Reference" doc:id="e26debc2-078a-4b7e-8e08-abdcdfd0cadd" name="os-demoSub_Flow"/>
+	</flow>
+	<sub-flow name="os-demoSub_Flow" doc:id="b1a1af1c-c2c4-4c92-a711-cec321266442" >
+		<choice doc:name="Choice" doc:id="2980de5f-bfe8-4e95-b48b-b5e83a5cf2db">
+			<when expression="#[payload==true]">
+				<os:retrieve doc:name="Retrieve" doc:id="43d375e0-ca8e-4407-a1d7-2ba1c7429d88" key="#[vars.v1]" objectStore="Object_store" />
+				<logger level="INFO" doc:name="Logger" doc:id="3d3db9fb-80c9-4161-9a45-190d71980d57" message="when route" />
+				<os:remove doc:name="Remove" doc:id="9df66f2b-a639-48e6-abb6-e43f30089c39" key="#[vars.v1]" objectStore="Object_store" />
+			</when>
+			<otherwise>
+				<os:retrieve-all-keys doc:name="Retrieve all keys" doc:id="60d92bfe-8ad9-428f-b379-e8b03cbae149" objectStore="Object_store" />
+				<ee:transform doc:name="Transform Message" doc:id="24ff0657-a239-4ed2-af9c-7283fd6a26d0">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<logger level="INFO" doc:name="Logger" doc:id="e2472d5b-f4d9-47ef-b125-291b1f091c1c" message="default flow" />
+				<os:clear doc:name="Clear" doc:id="eb97dd80-4fa8-4896-a187-72a9badcd52b" objectStore="Object_store" />
+			</otherwise>
+		</choice>
+	</sub-flow>
+</mule>
