@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="b95dbade-3239-416d-a0f7-1477e44671e0" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="b2fa5861-dedd-49d9-b8a3-5b241e599321" >
+		<http:request-connection host="api.first.org" />
+	</http:request-config>
+	<flow name="batch5-demoFlow" doc:id="393287f9-195e-4b6d-8813-1ce2f66e63f8" >
+		<http:listener doc:name="Listener" doc:id="8ad5d12a-88af-4544-9699-726ec28de811" config-ref="HTTP_Listener_config" path="/request"/>
+		<ee:transform doc:name="Transform Message" doc:id="df0d6490-d1f6-4c0d-8eba-88368120dd50" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+{
+}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="v1" ><![CDATA[attributes.queryParams.country]]></ee:set-variable>
+				<ee:set-variable variableName="v2" ><![CDATA[attributes.queryParams.team]]></ee:set-variable>
+				<ee:set-variable variableName="v3" ><![CDATA[attributes.queryParams.region]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<http:request method="GET" doc:name="Request" doc:id="382095c3-5b5c-4e6f-bd00-4f3595788afd" config-ref="HTTP_Request_configuration" path="/data/v1/teams">
+			<http:query-params ><![CDATA[#[output application/java
+---
+{
+	country : vars.v1,
+	team : vars.v2,
+	region : vars.v3
+}]]]></http:query-params>
+		</http:request>
+		<logger level="INFO" doc:name="Logger" doc:id="8b64d710-924c-4747-83c6-474587ffc8fe" message="#[payload]"/>
+	</flow>
+</mule>
