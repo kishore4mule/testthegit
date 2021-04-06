@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="bdd27ced-63f5-4805-a40e-55f3f82f4310" >
+		<http:listener-connection host="0.0.0.0" port="8082" />
+	</http:listener-config>
+	<flow name="http-requestFlow" doc:id="2c87bd84-854c-422a-b6cd-b49574f31ef9" >
+		<http:listener doc:name="Listener" doc:id="7867da17-952f-4e9f-89af-b36059f8e27f" config-ref="HTTP_Listener_config" path="/flows"/>
+		<logger level="INFO" doc:name="Logger" doc:id="ed1326b8-6799-42a1-ad50-3761dfe54f38" message='#["before subflow"]'/>
+		<flow-ref doc:name="Flow Reference" doc:id="47525e8a-6fe6-4542-ade8-3a7ae4da2eb4" name="http-requestFlow1"/>
+	</flow>
+	<flow name="http-requestFlow1" doc:id="5bc88656-56c2-4220-81ca-70b0a8a4ae9f" >
+		<set-payload value='#["hi all from batch 5 mule clASS"]' doc:name="Set Payload" doc:id="2b7896df-72ae-4cb6-a84e-d194005e13d8" />
+	</flow>
+</mule>
