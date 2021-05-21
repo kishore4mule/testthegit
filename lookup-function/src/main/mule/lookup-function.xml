@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="afc6098c-5894-4895-842b-9841956b9864" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<file:config name="File_Config" doc:name="File Config" doc:id="41242909-4f1d-4260-ac2b-343095fa00dd" >
+		<file:connection workingDir="C:\Users\91955\OneDrive\Desktop\kishore" />
+	</file:config>
+	<flow name="lookup-functionFlow" doc:id="1020dd88-ade5-4c16-ab94-08be4195721d" >
+		<http:listener doc:name="Listener" doc:id="c264ec77-dd96-4d86-81b5-2a36d26037fc" config-ref="HTTP_Listener_config" path="/lk" outputMimeType="application/json">
+			<http:response >
+				<http:body ><![CDATA[#[output application/json ---payload]]]></http:body>
+			</http:response>
+		</http:listener>
+		<set-payload value='#["hello"]' doc:name="Set Payload" doc:id="40448216-f8af-4fa1-bc4a-39f1ef78e73e" />
+		<set-variable value='#[%dw 2.0
+output application/json
+---
+{
+	result:Mule::lookup("lookup-functionFlow1",payload)
+}]' doc:name="Set Variable" doc:id="c677a67d-275d-4799-92d7-e08d4add95bc" variableName="v1"/>
+		<set-payload doc:name="Set Payload" doc:id="c34fcc0b-2c0e-43be-aafa-05e280393f1f" value="#[vars.v1]"/>
+	</flow>
+	<flow name="lookup-functionFlow1" doc:id="655d2ea8-9eaf-4a16-aa53-165534a16689" >
+		<scatter-gather doc:name="Scatter-Gather" doc:id="bcb32e64-791b-4567-9135-0f14ab6aaef0">
+			<route>
+				<file:read doc:name="Read" doc:id="802eaee9-5ea6-4ff5-ab5b-1078f16e1bea" path="C:\Users\91955\OneDrive\Desktop\kishore\input\exam.csv" config-ref="File_Config" />
+				<ee:transform doc:name="Transform Message" doc:id="a0f37aaf-fb19-4bd7-a9b7-e3c7783a711d">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</route>
+			<route>
+				<file:read doc:name="Read" doc:id="5d2a2204-d413-472a-a799-8ffa8f65e461" path="C:\Users\91955\OneDrive\Desktop\kishore\input\FL_insurance_sample.csv" config-ref="File_Config" />
+				<ee:transform doc:name="Transform Message" doc:id="2617318d-c0dc-42e4-b77c-6be643ae942c">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+			</route>
+		</scatter-gather>
+	</flow>
+</mule>
