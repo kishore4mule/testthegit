@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="a079ec50-dc6f-45c8-805e-e47c2f6c7f5d" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<flow name="cdepolyFlow" doc:id="7a8b46be-a17d-4d72-9211-7b75bb23008f" >
+		<http:listener doc:name="Listener" doc:id="007cf95d-277f-4f4d-8f11-5a50584ce159" config-ref="HTTP_Listener_config" path="/cdeploy"/>
+		<set-payload value='#["hello this is kishore"]' doc:name="Set Payload" doc:id="78799011-af24-4122-8d08-8c1ca77d8369" />
+	</flow>
+</mule>
