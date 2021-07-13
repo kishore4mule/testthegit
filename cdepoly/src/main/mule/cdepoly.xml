@@ -9,6 +9,6 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
 	</http:listener-config>
 	<flow name="cdepolyFlow" doc:id="7a8b46be-a17d-4d72-9211-7b75bb23008f" >
 		<http:listener doc:name="Listener" doc:id="007cf95d-277f-4f4d-8f11-5a50584ce159" config-ref="HTTP_Listener_config" path="/cdeploy"/>
-		<set-payload value='#["hello this is kishore"]' doc:name="Set Payload" doc:id="78799011-af24-4122-8d08-8c1ca77d8369" />
+		<set-payload value='#["hello this is kishore4"]' doc:name="Set Payload" doc:id="78799011-af24-4122-8d08-8c1ca77d8369" />
 	</flow>
 </mule>
